@@ -1,0 +1,85 @@
+-- cria o tipo de dados tarefa
+data Tarefa = Tarefa String deriving (Show)
+
+-- criar o tipo de dados lista de tarefas
+data ListaTarefas = Lista [Tarefa]
+
+-- função para adicionar uma tarefa
+adicionarTarefa :: Tarefa -> ListaTarefas -> ListaTarefas
+adicionarTarefa tarefa (Lista tarefas) = Lista (tarefa : tarefas)
+
+-- função para remover tarefa pelo índice
+removerTarefa :: Int -> ListaTarefas -> ListaTarefas
+removerTarefa indice (Lista tarefas) = Lista (removerAux indice tarefas)
+  where
+    removerAux :: Int -> [a] -> [a]
+    removerAux _ [] = []
+    removerAux 0 (_:resto) = resto
+    removerAux n (x:resto) = x : removerAux (n - 1) resto
+
+-- função para exibir tarefas enumeradas a partir de 0
+exibirTarefas :: ListaTarefas -> IO ()
+exibirTarefas (Lista tarefas) = mapM_ putStrLn $ zipWith (\i t -> show i ++ ". " ++ show t) [0..] tarefas
+
+-- função para exibir o menu
+-- recebemos uma lista de tarefas como parametro para sempre atualizar a lista
+menu :: ListaTarefas -> IO ()
+menu lista = do
+    putStrLn ""
+    putStrLn "o--------o"
+    putStrLn "|  Menu  |"
+    putStrLn "o--------o"
+    putStrLn "[1] Adicionar"
+    putStrLn "[2] Remover"
+    putStrLn "[3] Mostrar"
+    putStrLn "[4] Sair"
+    putStrLn ""
+    putStrLn "Opção: "
+    opcao <- getLine
+    putStrLn ""
+    case opcao of
+        "1" -> do
+            putStrLn "o--------------------o"
+            putStrLn "|  Escreva a tarefa  |"
+            putStrLn "o--------------------o"
+            tarefa <- getLine
+            let novaLista = adicionarTarefa (Tarefa tarefa) lista
+            putStrLn "o----------------------------------o"
+            putStrLn "|  Tarefa adicionada com sucesso!  |"
+            putStrLn "o----------------------------------o"
+            menu novaLista
+        "2" -> do
+            putStrLn "o------------------------------o"
+            putStrLn "|  Escreva o índice da tarefa  |"
+            putStrLn "o------------------------------o"
+            indiceStr <- getLine
+            let indice = read indiceStr :: Int
+            let novaLista = removerTarefa indice lista
+            putStrLn "o--------------------------------o"
+            putStrLn "|  Tarefa removida com sucesso!  |"
+            putStrLn "o--------------------------------o"
+            menu novaLista
+        "3" -> do
+            putStrLn "o--------------------o"
+            putStrLn "|  Listando Tarefas  |"
+            putStrLn "o--------------------o"
+            exibirTarefas lista
+            menu lista
+        "4" -> do 
+            putStrLn "o-----------------o"
+            putStrLn "|  Volte Sempre!  |"
+            putStrLn "o=================o\n"
+        _ -> do
+            putStrLn "x-------------------x"
+            putStrLn "|  Opção inválida!  |"
+            putStrLn "x-------------------x\n"
+            menu lista
+
+main :: IO ()
+main = do
+    putStrLn ""
+    putStrLn "o============================o"
+    putStrLn "|  Bem Vindo - Task Manager  |"
+    putStrLn "o----------------------------o"
+    menu (Lista [])
+    putStr ""
